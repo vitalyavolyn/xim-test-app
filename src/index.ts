@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ValidationError } from 'express-json-validator-middleware';
+import { scheduleJob } from 'node-schedule';
 
 import { validateJwt } from './middlewares/jwt';
 import {
@@ -12,6 +13,7 @@ import {
   infoRouter,
   logoutRouter,
 } from './routes';
+import { clearRevokedTokens } from './clear-revoked-tokens';
 
 dotenv.config();
 
@@ -47,6 +49,9 @@ app.use(
     }
   }
 );
+
+// runs every hour
+scheduleJob('0 * * * *', clearRevokedTokens);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
